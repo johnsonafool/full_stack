@@ -4,6 +4,10 @@
 const express = require("express");
 const cors = require("cors");
 
+const mongoose = require("mongoose");
+
+const Note = require("./models/note");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -14,6 +18,16 @@ app.use(cors());
 //   response.writeHead(200, { "Content-Type": "text/plain" });
 //   response.end("Hello World");
 // });
+
+const url = ""; //mongo db uri
+
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+});
 
 let notes = [
   {
@@ -49,7 +63,9 @@ app.get("/", (request, response) => {
 });
 
 app.get("/api/notes", (request, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.get("/api/notes/:id", (request, response) => {
