@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 const app = express();
 const Note = require("./models/note");
 const note = require("./models/note");
+const { request, response } = require("express");
 app.use(express.json());
 app.use(cors());
 
@@ -110,10 +111,11 @@ app.get("/api/notes/:id", (request, response, next) => {
 
 //   response.status(204).end();
 // });
+
 app.delete("/api/notes/:id", (request, response, next) => {
   Note.findByIdAndRemove(request.params.id)
     .then((result) => {
-      response.status(204).end();
+      response.status(204).end(); // 204 no content
     })
     .catch((error) => error.message);
 });
@@ -170,9 +172,30 @@ app.post("/api/notes", (request, response) => {
 
   // response.json(note);
 
-  note.save().then((savedNote) => {
-    response.json(savedNote);
-  });
+  note
+    .save()
+    .then((savedNote) => {
+      response.json(savedNote);
+    })
+    .catch((error) => next(error));
+});
+
+app.put("api/notes/:id", (request, response, next) => {
+  const { content, important } = request.body;
+  const body = request.body;
+  // const note = {
+  //   content: body.content,
+  //   important: body.important,
+  // };
+  Note.findByIdAndUpdate(request.params.id, note, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
+    .then((updateNote) => {
+      response.json(updateNote);
+    })
+    .catch((error) => next(error));
 });
 
 // const PORT = process.env(PORT) || 3001;
@@ -181,20 +204,23 @@ app.post("/api/notes", (request, response) => {
 // app.listen(PORT);
 // console.log(`Server running on port ${PORT}`);
 
+// express erro handler
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message);
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    // program ran into some val issue
+    return response.status(400).json({ error: error.message });
+  }
+
+  next(error);
+};
+
+// this has to be the last loaded middleware.
+app.use(errorHandler);
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// // express erro handler
-// const errorHandler = (error, request, response, next) => {
-//   console.log(error.message)
-//   if (error.name === 'CastError') {
-//     return response.status(400).send({ error: 'malformatted id' })
-//   }
-
-//   next(error)
-// }
-
-// // this has to be the last loaded middleware.
-// app.use(errorHandler)

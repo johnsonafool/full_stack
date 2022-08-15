@@ -12,9 +12,23 @@ const password = process.argv[2];
 
 const url = `mongodb+srv://notes-app-full:${password}@cluster1.lvvbt.mongodb.net/?retryWrites=true&w=majority`;
 
+// const noteSchema = new mongoose.Schema({
+//   content: String,
+//   date: Date,
+//   important: Boolean,
+// });
+
+// add schema rule of database
 const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
+  content: {
+    type: String,
+    minLenth: 5,
+    require: true,
+  },
+  date: {
+    type: Date,
+    require: true,
+  },
   important: Boolean,
 });
 
