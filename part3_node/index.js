@@ -1,14 +1,16 @@
 // console.log("hello world");
 // Debug with chrome dev consloe: node --inspect index.js
 
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 
 const mongoose = require("mongoose");
 
-const Note = require("./models/note");
-
 const app = express();
+const Note = require("./models/note");
+const note = require("./models/note");
 app.use(express.json());
 app.use(cors());
 
@@ -19,7 +21,7 @@ app.use(cors());
 //   response.end("Hello World");
 // });
 
-const url = ""; //mongo db uri
+const url = ""; //mongo db url
 
 mongoose.connect(url);
 
@@ -69,13 +71,27 @@ app.get("/api/notes", (request, response) => {
 });
 
 app.get("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const note = notes.find((note) => note.id === id);
-  if (note) {
-    response.json(note);
-  } else {
-    response.status(404).end();
-  }
+  Note.findById(request.params.id)
+    .then((note) => {
+      // response.json(note);
+      if (note) {
+        response.json(note);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      response.status(500).end();
+    });
+
+  // const id = Number(request.params.id);
+  // const note = notes.find((note) => note.id === id);
+  // if (note) {
+  //   response.json(note);
+  // } else {
+  //   response.status(404).end();
+  // }
 
   //   console.log(id);
   //   const note = notes.find((note) => {
@@ -118,30 +134,45 @@ const generateId = () => {
 app.post("/api/notes", (request, response) => {
   const body = request.body;
 
-  if (!body.content) {
-    return response.status(400).json({
-      error: "content missing",
-    });
+  // if (!body.content) {
+  //   return response.status(400).json({
+  //     error: "content missing",
+  //   });
+  // }
+
+  if (body.content === undefined) {
+    return response.status(400).json({ error: "content missing" });
   }
 
-  const note = {
+  // const note = {
+  //   content: body.content,
+  //   important: body.important || false,
+  //   date: new Date(),
+  //   id: generateId(),
+  // };
+
+  const note = new Note({
     content: body.content,
     important: body.important || false,
     date: new Date(),
-    id: generateId(),
-  };
+  });
 
-  notes = notes.concat(note);
+  // notes = notes.concat(note);
 
-  response.json(note);
+  // response.json(note);
+
+  note.save().then((savedNote) => {
+    response.json(savedNote);
+  });
 });
 
 // const PORT = process.env(PORT) || 3001;
-const PORT = 3002;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
 // const PORT = 3001;
 // app.listen(PORT);
 // console.log(`Server running on port ${PORT}`);
+
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
