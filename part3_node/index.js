@@ -70,7 +70,7 @@ app.get("/api/notes", (request, response) => {
   });
 });
 
-app.get("/api/notes/:id", (request, response) => {
+app.get("/api/notes/:id", (request, response, next) => {
   Note.findById(request.params.id)
     .then((note) => {
       // response.json(note);
@@ -80,33 +80,42 @@ app.get("/api/notes/:id", (request, response) => {
         response.status(404).end();
       }
     })
-    .catch((error) => {
-      console.log(error);
-      response.status(500).end();
-    });
-
-  // const id = Number(request.params.id);
-  // const note = notes.find((note) => note.id === id);
-  // if (note) {
-  //   response.json(note);
-  // } else {
-  //   response.status(404).end();
-  // }
-
-  //   console.log(id);
-  //   const note = notes.find((note) => {
-  //     console.log(note.id, typeof note.id, id, typeof id, note.id === id);
-  //     return note.id === id;
-  //   });
-  //   console.log(note);
-  //   response.json(note);
+    .catch((error) => next(error));
+  // .catch((error) => {
+  // console.log(error);
+  // response.status(500).end();
+  // response.status(400).send({ error: "malformatted id" }); // 400 bad request "The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications."
 });
 
-app.delete("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  notes = notes.filter((note) => note.id !== id);
+// const id = Number(request.params.id);
+// const note = notes.find((note) => note.id === id);
+// if (note) {
+//   response.json(note);
+// } else {
+//   response.status(404).end();
+// }
 
-  response.status(204).end();
+//   console.log(id);
+//   const note = notes.find((note) => {
+//     console.log(note.id, typeof note.id, id, typeof id, note.id === id);
+//     return note.id === id;
+//   });
+//   console.log(note);
+//   response.json(note);
+// });
+
+// app.delete("/api/notes/:id", (request, response) => {
+//   const id = Number(request.params.id);
+//   notes = notes.filter((note) => note.id !== id);
+
+//   response.status(204).end();
+// });
+app.delete("/api/notes/:id", (request, response, next) => {
+  Note.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => error.message);
 });
 
 // app.post("/api/notes", (request, response) => {
@@ -176,3 +185,16 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// // express erro handler
+// const errorHandler = (error, request, response, next) => {
+//   console.log(error.message)
+//   if (error.name === 'CastError') {
+//     return response.status(400).send({ error: 'malformatted id' })
+//   }
+
+//   next(error)
+// }
+
+// // this has to be the last loaded middleware.
+// app.use(errorHandler)
