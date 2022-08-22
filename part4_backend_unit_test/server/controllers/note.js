@@ -25,7 +25,8 @@ notesRouter.get("/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-notesRouter.post("/", (request, response, next) => {
+// if async/await method has been chosen for api call, try cathc block will be used for handle the error
+notesRouter.post("/", async (request, response, next) => {
   const body = request.body;
 
   const note = new Note({
@@ -34,13 +35,22 @@ notesRouter.post("/", (request, response, next) => {
     date: new Date(),
   });
 
-  note
-    .save()
-    .then((savedNote) => {
-      // response.json(savedNote);
-      response.status(201).json(savedNote);
-    })
-    .catch((error) => next(error));
+  try {
+    const savedNote = await note.save();
+    response.status(201).json(savedNote);
+  } catch (exception) {
+    // The catch block simply calls the next function, which passes the request handling to the error handling middleware.
+    next(exception);
+    // console.log(exception);
+  }
+
+  // note
+  //   .save()
+  //   .then((savedNote) => {
+  //     // response.json(savedNote);
+  //     response.status(201).json(savedNote);
+  //   })
+  //   .catch((error) => next(error));
 });
 
 notesRouter.put("/:id", (request, response, next) => {
