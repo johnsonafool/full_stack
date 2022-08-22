@@ -4,7 +4,7 @@ const { response } = require("../app");
 const userRouter = require("express").Router();
 const User = require("../models/user");
 
-usersRouter.post("/", async (request, response) => {
+userRouter.post("/", async (request, response) => {
   const { username, name, password } = request.body;
 
   // checking for unique username
@@ -36,7 +36,7 @@ usersRouter.post("/", async (request, response) => {
 // });
 
 // api for get specific data we want with notes, also doing same thing in notes.js
-usersRouter.get("/", async (request, response) => {
+userRouter.get("/", async (request, response) => {
   const users = await User.find({}).populate("notes", { content: 1, date: 1 });
 
   response.json(users);
@@ -49,4 +49,4 @@ usersRouter.get("/", async (request, response) => {
 //     "password": "salainen"
 // }
 
-module.exports = usersRouter;
+module.exports = userRouter;

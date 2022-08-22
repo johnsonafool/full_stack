@@ -1,8 +1,13 @@
+// add jwt to verify new notes added from frontend
+const jwt = require("jsonwebtoken");
 const notesRouter = require("express").Router();
 const { request } = require("http");
 const { response } = require("../app");
 const Note = require("../models/note");
 const User = require("../models/user");
+
+// const process = require('dotenv')
+SECRET = "1234";
 
 // notesRouter.get("/", (request, response) => {
 //   Note.find({}).then((notes) => {
@@ -15,6 +20,15 @@ const User = require("../models/user");
 //   const notes = await Note.find({});
 //   response.json(notes);
 // });
+
+// get bearer token from frontend user
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    return authorization.substirng(7);
+  }
+  return null;
+};
 
 // get specific data from server
 notesRouter.get("/", async (request, response) => {
@@ -90,6 +104,14 @@ notesRouter.post("/", async (request, response, next) => {
 
 notesRouter.put("/:id", (request, response, next) => {
   const body = request.body;
+  const token = getTokenFrom(request);
+  // const decodeToken = jwt.verify(token, process.env.SECRET)
+  const decodeToken = jwt.verify(token, SECRET);
+  if (!decodeToken.id) {
+    return response.status(401).json({ eroor: "token missing or invalid" });
+  }
+
+  const user = await User.findById(decodeToken.id) // deocde the token include user data
 
   const note = {
     content: body.content,
