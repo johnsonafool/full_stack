@@ -2,6 +2,7 @@ const notesRouter = require("express").Router();
 const { request } = require("http");
 const { response } = require("../app");
 const Note = require("../models/note");
+const User = require("../models/user");
 
 // notesRouter.get("/", (request, response) => {
 //   Note.find({}).then((notes) => {
@@ -9,8 +10,15 @@ const Note = require("../models/note");
 //   });
 // });
 
+// get all data from the server
+// notesRouter.get("/", async (request, response) => {
+//   const notes = await Note.find({});
+//   response.json(notes);
+// });
+
+// get specific data from server
 notesRouter.get("/", async (request, response) => {
-  const notes = await Note.find({});
+  const notes = await Note.find({}).populate("user", { username: 1, name: 1 });
   response.json(notes);
 });
 
@@ -51,15 +59,19 @@ notesRouter.delete("/:id", async (request, response, next) => {
 // if async/await method has been chosen for api call, try cathc block will be used for handle the error
 notesRouter.post("/", async (request, response, next) => {
   const body = request.body;
-
+  const user = await User.findById(body.userID); // who created a note is sent in the userId field of the request body:
   const note = new Note({
     content: body.content,
-    important: body.important || false,
+    // important: body.important || false,
+    important: body.important === undefined ? false : body.important,
     date: new Date(),
+    user: user._id,
   });
 
   try {
     const savedNote = await note.save();
+    user.notes = user.notes.concat(savedNote._id);
+    await user.save();
     response.status(201).json(savedNote);
   } catch (exception) {
     // The catch block simply calls the next function, which passes the request handling to the error handling middleware.
