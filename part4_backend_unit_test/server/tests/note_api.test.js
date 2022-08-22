@@ -85,7 +85,7 @@ test("note without content is not added", async () => {
   // expect(res.body).toHaveLength(initialNotes.length); // check if the lenght is the same
 });
 
-// tests for fetching and removing an individual note
+// tests for fetching and removing an sigle note, fetching:
 test("a specifirc note can be viewd", async () => {
   const notesAtStart = await helper.notesInDb();
   const noteToView = notesAtStart[0];
@@ -93,7 +93,20 @@ test("a specifirc note can be viewd", async () => {
     .get(`/api/notes/${noteToView.id}`)
     .expect(200)
     .expect("Content-Type", /application\/json/);
-  const processedNoteToView = JSON.parse();
+  const processedNoteToView = JSON.parse(JSON.stringify(noteToView));
+  expect(resultNote.body).toEqual(processedNoteToView);
+});
+
+// removing:
+test("a note can be delted", async () => {
+  const notesAtStart = await helper.notesInDb();
+  const noteToDelete = notesAtStart[0];
+
+  await api.delete(`/api/notes/${noteToDelete.id}`).expect(204);
+  const noteAtEnd = await helper.notesInDb();
+  expect(noteAtEnd).toHaveLength(helper.initialNotes.length - 1); // minus one stands for remove one item
+  const contents = noteAtEnd.map((r) => r.content);
+  expect(contents).not.toContain(noteToDelete.content); // noteToDelete.content will not inclue in the contents
 });
 
 afterAll(() => {

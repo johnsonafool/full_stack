@@ -1,5 +1,6 @@
 const notesRouter = require("express").Router();
 const { request } = require("http");
+const { response } = require("../app");
 const Note = require("../models/note");
 
 // notesRouter.get("/", (request, response) => {
@@ -13,17 +14,39 @@ notesRouter.get("/", async (request, response) => {
   response.json(notes);
 });
 
-notesRouter.get("/:id", (request, response, next) => {
-  Note.findById(request.params.id)
-    .then((note) => {
-      if (note) {
-        response.json(note);
-      } else {
-        response.status(404).end();
-      }
-    })
-    .catch((error) => next(error));
+// async style for get certain id
+notesRouter.get("/:id", async (request, response, next) => {
+  try {
+    const note = Note.findById(request.params.id);
+
+    if (note) {
+      response.json(note);
+    } else {
+      response.status(404).end();
+    }
+  } catch {
+    (exception) => next(exception);
+  }
 });
+
+// async style for delte certain id
+notesRouter.delete("/:id", async (request, response, next) => {
+  try {
+    await Note.findByIdAnRemove(request.params.id);
+    response.status(204).end();
+  } catch (exception) {
+    {
+      next(exception);
+    }
+  }
+});
+
+// async func should follow this style
+// try {
+//   // do the async operations here
+// } catch(exception) {
+//   next(exception)
+// }
 
 // if async/await method has been chosen for api call, try cathc block will be used for handle the error
 notesRouter.post("/", async (request, response, next) => {
