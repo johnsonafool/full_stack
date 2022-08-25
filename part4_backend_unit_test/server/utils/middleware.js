@@ -23,6 +23,11 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({
       error: "invalid token", // extend our errorHandler middleware to take into account the different decoding errors.
     });
+  } else if (error.name === "TokenExpiredError") {
+    // base on login period, another approach is server side session.
+    return response.status(401).json({
+      error: "token expired",
+    });
   }
 
   next(error);

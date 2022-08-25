@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 const loginRouter = require("express").Router();
 const User = require("../models/user");
 
+// const process = require("dotenv"); // ?? not sure
+
 loginRouter.post("/", async (request, response) => {
   const { username, password } = request.body;
 
@@ -25,7 +27,11 @@ loginRouter.post("/", async (request, response) => {
     id: user._id,
   };
 
-  const token = jwt.sign(userForToken, process.env.SECRET); // password is correct
+  // const token = jwt.sign(userForToken, process.env.SECRET); // password is correct
+  // process .env.SECRET
+  const token = jwt.sign(userForToken, process.env.SECRET, {
+    expiresIn: 60 * 60, // in one hour
+  });
 
   response
     .status(200)
