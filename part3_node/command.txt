@@ -1,1 +1,0 @@
-node --inspect index.js // useful tool for debugging
