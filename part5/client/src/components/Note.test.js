@@ -44,3 +44,6 @@ test("clicking the button calls event handler once", async () => {
 
   expect(mockHandler.mock.calls).toHaveLength(1);
 });
+
+// gen inspecting coverage folder //
+// CI=true npm test -- --coverage //
