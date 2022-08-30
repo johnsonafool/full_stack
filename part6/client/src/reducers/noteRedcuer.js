@@ -1,4 +1,5 @@
-// here set up init of redux
+import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = [
   {
     content: "reducer defines how redux store works",
@@ -12,57 +13,35 @@ const initialState = [
   },
 ];
 
-const noteReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "NEW_NOTE":
-      return state.concat(action.data);
-    case "TOGGLE_IMPORTANCE": {
-      const id = action.data.id;
+const genId = () => {
+  Number((Math.random() * 10000).toFixed(0));
+};
+
+const noteSlice = createSlice({
+  name: "type",
+  initialState,
+  reducer: {
+    createNote(state, action) {
+      const content = action.payload;
+      state.push({
+        content,
+        important: false,
+        id: genId(),
+      });
+      // Redux Toolkit utilizes the Immer library with reducers created by createSlice function,
+      // which makes it possible to mutate the state argument inside the reducer
+    },
+    toggleImportanceOf(state, action) {
+      const id = action.payload;
       const noteToChange = state.find((n) => n.id === id);
       const changedNote = {
         ...noteToChange,
         important: !noteToChange.important,
       };
       return state.map((note) => (note.id !== id ? note : changedNote));
-    }
-    default:
-      return state;
-  }
-};
-
-const generateId = () => Number((Math.random() * 1000000).toFixed(0));
-
-export const createNote = (content) => {
-  return {
-    type: "NEW_NOTE",
-    data: {
-      content,
-      important: false,
-      id: generateId(),
     },
-  };
-};
+  },
+});
 
-// const filterReducer = (state = "ALL", action) => {
-//   switch (action.type) {
-//     case "SET_FILTER":
-//       return action.filter;
-//     default:
-//       return state;
-//   }
-// }; // create it at filter reducer js file
-
-// type of action //
-// {
-//   type: 'SET_FILTER',
-//   filter: 'IMPORTANT'
-// }
-
-export const toggleImportanceOf = (id) => {
-  return {
-    type: "TOGGLE_IMPORTANCE",
-    data: { id },
-  };
-};
-
-export default noteReducer;
+export const { createNote, toggleImportanceOf } = noteSlice.actions;
+export default noteSlice.reducer;
