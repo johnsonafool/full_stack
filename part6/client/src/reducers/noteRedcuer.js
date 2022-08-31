@@ -1,21 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
+import noteService from '../services/notes';
 
-const initialState = [
-  {
-    content: "reducer defines how redux store works",
-    important: true,
-    id: 1,
-  },
-  {
-    content: "state of store can contain any data",
-    important: false,
-    id: 2,
-  },
-];
+// const initialState = [
+//   {
+//     content: "reducer defines how redux store works",
+//     important: true,
+//     id: 1,
+//   },
+//   {
+//     content: "state of store can contain any data",
+//     important: false,
+//     id: 2,
+//   },
+// ];
 
-const genId = () => {
-  Number((Math.random() * 10000).toFixed(0));
-};
+// const genId = () => {
+//   Number((Math.random() * 10000).toFixed(0));
+// };
 
 const noteSlice = createSlice({
   name: "type",
@@ -52,5 +53,14 @@ const noteSlice = createSlice({
 
 export const { createNote, toggleImportanceOf, appendNote, setNotes } =
   noteSlice.actions;
+
+export const initializeNotes = ()=>{
+  return async dispatch =>{
+    const notes = await noteService.getAll()
+    dispatch(setNotes(notes)) 
+    // the operation first fetches all the notes from the server
+    //  and then dispatches the setNotes action, which adds them to the store.
+  }
+}
 
 export default noteSlice.reducer;
