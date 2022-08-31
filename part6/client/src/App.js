@@ -13,6 +13,7 @@ const App = () => {
   }, [dispatch]);
   // If the value of the dispatch-variable would change during runtime,
   //the effect would be executed again
+
   return (
     <div>
       <NewNote />
