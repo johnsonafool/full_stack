@@ -1,4 +1,14 @@
 import { useState } from "react";
+import { Alert, Nav, Navbar, Table } from "react-bootstrap"; // bootstrap stuff
+
+import {
+  Container,
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+} from "@mui/material";
 
 import {
   Link,
@@ -38,16 +48,43 @@ const Note = ({ note }) => {
   );
 };
 
+// const Notes = ({ notes }) => (
+//   <div>
+//     <h2>Notes</h2>
+//     <Table striped>
+//       <tbody>
+//         {notes.map((note) => (
+//           <tr key={note.id}>
+//             <td>
+//               <Link to={`/notes/${note.id}`}>{note.content}</Link>
+//             </td>
+//             <td>{note.user}</td>
+//           </tr>
+//         ))}
+//       </tbody>
+//     </Table>
+//   </div>
+// );
+
 const Notes = ({ notes }) => (
   <div>
     <h2>Notes</h2>
-    <ul>
-      {notes.map((note) => (
-        <li key={note.id}>
-          <Link to={`/notes/${note.id}`}>{note.content}</Link>
-        </li>
-      ))}
-    </ul>
+
+    {/* <TableContainer component={Paper}> */}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableBody>
+          {notes.map((note) => (
+            <TableRow key={note.id}>
+              <TableCell>
+                <Link to={`/notes/${note.id}`}>{note.content}</Link>
+              </TableCell>
+              <TableCell>{note.user}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   </div>
 );
 
@@ -87,6 +124,8 @@ const Login = (props) => {
   );
 };
 
+// In Bootstrap, all of the contents of the application
+// are typically rendered inside of a container.
 const App = () => {
   const [notes, setNotes] = useState([
     {
@@ -110,6 +149,7 @@ const App = () => {
   ]);
 
   const [user, setUser] = useState(null);
+  const [message, setMessage] = useState(null);
 
   const match = useMatch("/notes/:id");
 
@@ -119,6 +159,8 @@ const App = () => {
 
   const login = (user) => {
     setUser(user);
+    setMessage(`welcome ${user}`);
+    setTimeout(() => setMessage(null), 10000);
   };
 
   const padding = {
@@ -126,40 +168,61 @@ const App = () => {
   };
 
   return (
-    <div>
-      <div>
-        <Link style={padding} to="/">
-          home
-        </Link>
-        <Link style={padding} to="/notes">
-          notes
-        </Link>
-        <Link style={padding} to="/users">
-          users
-        </Link>
-        {user ? (
-          <em>{user} logged in</em>
-        ) : (
-          <Link style={padding} to="/login">
-            login
-          </Link>
-        )}
+    // while mui own container component, bootstrap own div container
+    <Container>
+      <div className="container">
+        {message && <Alert variant="success">{message}</Alert>}
+        <div>
+          <div>
+            <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+              <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="me-auto">
+                  <Nav.Link href="#" as="span">
+                    <Link style={padding} to="/">
+                      home
+                    </Link>
+                  </Nav.Link>
+                  <Nav.Link href="#" as="span">
+                    <Link style={padding} to="/notes">
+                      notes
+                    </Link>
+                  </Nav.Link>
+                  <Nav.Link href="#" as="span">
+                    <Link style={padding} to="/users">
+                      users
+                    </Link>
+                  </Nav.Link>
+                  <Nav.Link href="#" as="span">
+                    {user ? (
+                      <em style={padding}>{user} logged in</em>
+                    ) : (
+                      <Link style={padding} to="/login">
+                        login
+                      </Link>
+                    )}
+                  </Nav.Link>
+                </Nav>
+              </Navbar.Collapse>
+            </Navbar>
+          </div>
+          <Routes>
+            <Route path="/notes/:id" element={<Note note={note} />} />
+            <Route path="/notes" element={<Notes notes={notes} />} />
+            <Route
+              path="/users"
+              element={user ? <Users /> : <Navigate replace to="/login" />}
+            />
+            <Route path="/login" element={<Login onLogin={login} />} />
+            <Route path="/" element={<Home />} />
+          </Routes>
+          <div>
+            <br />
+            <em>Note app, Department of Computer Science 2022</em>
+          </div>
+        </div>
       </div>
-      <Routes>
-        <Route path="/notes/:id" element={<Note note={note} />} />
-        <Route path="/notes" element={<Notes notes={notes} />} />
-        <Route
-          path="/users"
-          element={user ? <Users /> : <Navigate replace to="/login" />}
-        />
-        <Route path="/login" element={<Login onLogin={login} />} />
-        <Route path="/" element={<Home />} />
-      </Routes>
-      <div>
-        <br />
-        <em>Note app, Department of Computer Science 2022</em>
-      </div>
-    </div>
+    </Container>
   );
 };
 
